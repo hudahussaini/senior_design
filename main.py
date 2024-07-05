@@ -1,43 +1,25 @@
 import os
 from pypdf import PdfReader 
+import pandas
 
-directory = 'James Wagner Publications'
+directory = 'Data'
 
-reader = PdfReader('smu009.pdf') 
+'''reader = PdfReader('smu009.pdf') '''
   
 # printing number of pages in pdf file 
-pdfLength = (len(reader.pages)) 
+'''pdfLength = (len(reader.pages)) 
 
 page = reader.pages[0]
 text = page.extract_text()
 print(pdfLength)
-
-'''
-number_of_pages = len(reader.pages)
-page = reader.pages[0]
-text = page.extract_text()
 '''
 
 
-file = ""
-for i in range(0, pdfLength):
-    page = reader.pages[i]
-    file += page
+file = pandas.read_csv('isr_faculty.csv')
+authorList = file['NameFull'].to_list()
+#print(authorList)
+#         
+outfile = open("Author List", 'a')
 
-print(file)
-
-# creating a page object 
-#page = reader.pages[:]
-        
-# extracting text from page 
-#print(page.extract_text())
-
-'''for i in os.listdir(directory):
-    name = os.path.splitext(i)[0]
-    ext = os.path.splitext(i)[1]
-
-    if name == 'smu009':'''
-        
-        
-
-        
+for i in authorList:
+    outfile.write(i + "\n")

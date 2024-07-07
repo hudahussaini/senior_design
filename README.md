@@ -1,7 +1,7 @@
-# senior_design
+## Senior Design Project
 Expert field modeling capstone project
 
-Tasks
+# Tasks
 
 Data Collection: Building a pipeline to gather full-text publications from various sources utilizing an API like Crossref and preprocess the data.
     Preprocess Data: Remove punctuation and non-alphabetic characters, make all words lowercase, remove stop words, lemmatization

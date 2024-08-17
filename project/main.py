@@ -1,21 +1,9 @@
-from project.data_pipline.pdf_scripts import fetch_pdf
 import pandas
-from APIs.crossref import use_crossref_api
+from data_pipline.webscraper import get_all_pdfs_from_experts_for_one_author
 
-directory = 'Data'
 
-'''reader = PdfReader('smu009.pdf') '''
-  
-# printing number of pages in pdf file 
-'''pdfLength = (len(reader.pages)) 
-
-page = reader.pages[0]
-text = page.extract_text()
-print(pdfLength)
-'''
-
-def read_inital_researcher_list():
-    file = pandas.read_csv('isr_faculty.csv')
+def read_inital_researcher_list(csv_path):
+    file = pandas.read_csv(csv_path)
     authorList = file['NameFull'].to_list()
     #print(authorList)
     #         
@@ -27,14 +15,10 @@ def read_inital_researcher_list():
     return authorList
 
 def get_publication(list_of_authors):
-    url_dict = use_crossref_api(list_of_authors, "mahreen248@gmail.com", 10)
-    print(url_dict)
-    #code to actually use pdf
-    # for paper in url_dict:
-        # content = fetch_pdf(url_dict[paper])
-        #put content through model
-        #store in 
+    for author in list_of_authors:
+            get_all_pdfs_from_experts_for_one_author(author)
+
     
-            
+list_of_authors = read_inital_researcher_list('/Users/hudahussaini/senior_design/data/isr_faculty.csv')            
 # list_of_authors = read_inital_researcher_list()
-get_publication(list_of_authors=["James Wagner"])
+get_publication(list_of_authors=list_of_authors)

@@ -1,5 +1,5 @@
 import requests
-from project.data_pipline.pdf_scripts import *
+from project.data_pipline.pdf import *
 
 def search_publications_by_author(author_name, email, n_rows:int):
     base_url = 'https://api.crossref.org/works'

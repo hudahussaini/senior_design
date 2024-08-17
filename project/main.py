@@ -1,4 +1,4 @@
-from pdf_scripts import fetch_pdf
+from project.data_pipline.pdf_scripts import fetch_pdf
 import pandas
 from APIs.crossref import use_crossref_api
 
@@ -36,5 +36,5 @@ def get_publication(list_of_authors):
         #store in 
     
             
-list_of_authors = read_inital_researcher_list()
-get_publication(list_of_authors=list_of_authors)
+# list_of_authors = read_inital_researcher_list()
+get_publication(list_of_authors=["James Wagner"])

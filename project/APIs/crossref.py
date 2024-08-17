@@ -1,5 +1,5 @@
 import requests
-from pdf_scripts import *
+from project.data_pipline.pdf_scripts import *
 
 def search_publications_by_author(author_name, email, n_rows:int):
     base_url = 'https://api.crossref.org/works'
@@ -30,9 +30,9 @@ def use_crossref_api(author_list, email, n_rows: int):
                 doi = item.get('DOI', 'No DOI')
                 url = item.get('link', [{}])[0].get('URL', 'No URL')
                 # print(f"{i+1}. {title} (DOI: {doi}) - URL: {url}")
-                if is_pdf_downloadable(url):
-                    url_dict[author][title] = url
-                    print(url)
+                # if is_pdf_downloadable(url):
+                url_dict[author][title] = url
+                #     print(url)
     return url_dict
     
 

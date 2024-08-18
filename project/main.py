@@ -1,24 +1,60 @@
-import pandas
-from data_pipline.webscraper import get_all_pdfs_from_experts_for_one_author
+import os
+import json
+from bertopic import BERTopic
+from sentence_transformers import SentenceTransformer
+from data_pipline.nlp import create_docs
 
+def get_topic(folder_path):
+    results = {}  # Dictionary to store results
 
-def read_inital_researcher_list(csv_path):
-    file = pandas.read_csv(csv_path)
-    authorList = file['NameFull'].to_list()
-    #print(authorList)
-    #         
-    outfile = open("Author List", 'a')
+    for author_folder in os.listdir(folder_path):
+        author_folder_path = os.path.join(folder_path, author_folder)
+        
+        if os.path.isdir(author_folder_path):
+            # Get list of PDF files for the current author
+            pdf_files = [os.path.join(author_folder_path, f) for f in os.listdir(author_folder_path) 
+                            if os.path.isfile(os.path.join(author_folder_path, f)) and f.endswith('.pdf')]
+            
+            # Create docs for the current author
+            docs = create_docs(pdf_files)
+            
+            if not docs:
+                print(f"No documents created for author: {author_folder}")
+                continue
+            
+            # Initialize sentence transformer model
+            sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+            embeddings = sentence_model.encode(docs, show_progress_bar=True)
+            
+            if len(docs) != len(embeddings):
+                raise ValueError("Mismatch between number of documents and embeddings.")
+            
+            # Initialize and fit BERTopic model
+            model = BERTopic(n_gram_range=(1, 2), min_topic_size=5, nr_topics="auto")
+            try:
+                model.fit(docs, embeddings)
+            except Exception as e:
+                print(f"Error fitting BERTopic model for author {author_folder}: {e}")
+                continue
+            
+            # Get detailed topic information and frequency
+            topic_freq = model.get_topic_freq().to_dict()  # Convert DataFrame to dict
+            topic_info = model.get_topic_info().to_dict()  # Convert DataFrame to dict
+            representative_docs = model.get_representative_docs()
+            
+            # Store results in dictionary
+            results[author_folder] = {
+                "topic_freq": topic_freq,
+                "topic_info": topic_info,
+                "representative_docs": representative_docs
+            }
 
-    for i in authorList:
-        outfile.write(i + "\n")
-    
-    return authorList
+    # Write results to a JSON file
+    with open('topic_modeling_results.json', 'w') as f:
+        json.dump(results, f, indent=4)
 
-def get_publication(list_of_authors):
-    for author in list_of_authors:
-            get_all_pdfs_from_experts_for_one_author(author)
+    return results
 
-    
-list_of_authors = read_inital_researcher_list('/Users/hudahussaini/senior_design/data/isr_faculty.csv')            
-# list_of_authors = read_inital_researcher_list()
-get_publication(list_of_authors=list_of_authors)
+# Example usage
+folder_path = "/Users/hudahussaini/senior_design/data/downloads"
+results = get_topic(folder_path)

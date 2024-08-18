@@ -20,7 +20,7 @@ pip install pymupdf
 """
 
 import os
-import fitz  # PyMuPDF
+import PyPDF2  # PyMuPDF
 import nltk
 import string
 import sklearn
@@ -37,11 +37,26 @@ nltk.download('stopwords')
 """### Text Processing"""
 
 def read_pdf(file_path):
-    text = ""
-    with fitz.open(file_path) as doc:
-        for page in doc:
-            text += page.get_text()
-    return text
+    """Reads a PDF file and extracts text from all pages.
+
+    Args:
+        file_path (str): Path to the PDF file.
+
+    Returns:
+        str: Extracted text from the PDF.
+    """
+
+    try:
+        with open(file_path, 'rb') as file:
+            reader = PyPDF2.PdfReader(file)
+            text = ""
+            for page_num in range(len(reader.pages)):
+                page = reader.pages[page_num]
+                text += page.extract_text()
+            return text
+    except (FileNotFoundError, PermissionError, PyPDF2.errors.PdfReadError) as e:
+        print(f"Error reading PDF file: {file_path}, {e}")
+        return ""  # Or raise an exception if preferred
 
 def preprocess_text(text):
     # Tokenization
@@ -72,11 +87,6 @@ def find_files_in_current_directory():
     files = [f for f in os.listdir(current_directory) if os.path.isfile(os.path.join(current_directory, f))]
     return files
 
-# Call the function to get a list of file names
-file_names = find_files_in_current_directory()
-
-len(file_names)
-
 def create_docs(file_names):
     docs = []
     for file in file_names:
@@ -84,33 +94,16 @@ def create_docs(file_names):
             text = read_pdf(file)
             preprocessed_text = preprocess_text(text)
             docs.append(preprocessed_text)
-        except:
-            pass
+        except Exception as e:
+            print(f"Error processing file {file}: {e}")
+            # Optionally, you can log the error or skip the file here
 
+    if not docs:
+        # Handle the case where no files were processed successfully
+        print("No documents created due to processing errors.")
     return docs
 
-docs = create_docs(file_names)
 
-"""### Modeling"""
-
-BERTopic().get_params()
-
-from sentence_transformers import SentenceTransformer, util
-
-sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
-embeddings = sentence_model.encode(docs, show_progress_bar=True)
-
-model = BERTopic().fit(docs, embeddings)
-
-"""model = BERTopic(n_gram_range=(1,2), nr_topics=6)
-topics, probs = model.fit_transform(docs)
-"""
-
-model.get_topic_freq()
-
-model.get_topic_info()
-
-#non responce -> topic disamp
 
 
 

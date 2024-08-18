@@ -3,6 +3,8 @@ import nltk
 from nltk.corpus import stopwords
 from gensim import corpora, models
 import fitz  # PyMuPDF
+import pyLDAvis
+import pyLDAvis.gensim
 
 nltk.download('stopwords')
 stop_words = stopwords.words('english')
@@ -42,7 +44,12 @@ def lda_topic_modeling(folder_path, num_topics=5):
             
             # Build LDA model
             lda_model = models.LdaModel(corpus, num_topics=num_topics, id2word=dictionary, passes=10)
-            
+            # Prepare data for pyLDAvis visualization
+            vis_data = pyLDAvis.gensim.prepare(lda_model, corpus, dictionary)
+            # pyLDAvis.enable_notebook()  # Enable for Jupyter notebook
+            # OR
+            pyLDAvis.save_html(vis_data, f'/Users/hudahussaini/senior_design/data/downloads/{author_folder}/lda_visualization.html')  # Save to standalone HTML
+
             # Get topics
             topics = lda_model.print_topics(num_words=10)
             results[author_folder] = topics

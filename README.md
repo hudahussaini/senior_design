@@ -1,6 +1,17 @@
 ## Senior Design Project
 Expert field modeling capstone project
 
+## How to run 
+
+Currently for the demo it uses Bhirhanu Eshete but you can replace with another author wherever Bhirhanu's name is. Also replace my path with yours. 
+
+
+for one author:
+get_all_pdfs_from_experts_for_one_author("AUTHOR_FIRST_NAME AUTHOR_LAST_NAME")
+
+
+
+
 # Tasks
 
 Data Collection: Building a pipeline to gather full-text publications from various sources utilizing an API like Crossref and preprocess the data.

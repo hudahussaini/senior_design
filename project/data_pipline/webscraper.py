@@ -16,6 +16,7 @@ def download_pdfs(driver: webdriver):
 def get_all_pdfs_from_experts_for_one_author(author_name: str):
     # Set up the Selenium WebDriver (this example uses Chrome)
     options = webdriver.ChromeOptions()
+    options.add_argument("--headless=new")
     options.add_experimental_option('prefs', {
     "download.default_directory": f'/Users/hudahussaini/senior_design/data/downloads/{author_name}', #Change default directory for downloads
     "download.prompt_for_download": False, #To auto download the file

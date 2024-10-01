@@ -19,4 +19,8 @@ def clean_author_list(path):
         authors[author_index] = temp_author
     return authors
 
-print(clean_author_list(list_path))
+
+alist = clean_author_list(list_path)
+
+with open('/Users/abolt/Desktop/clean_authors.txt', 'w') as f:
+    f.writelines('\n'.join(alist))

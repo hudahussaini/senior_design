@@ -26,6 +26,7 @@ def create_docs(pdf_files):
             docs.append(text)
     return docs
 
+
 def preprocess_documents(docs):
     processed_docs = []
     for doc in docs:

@@ -31,9 +31,16 @@ def preprocess_documents(docs):
     processed_docs = []
     for doc in docs:
         tokens = nltk.word_tokenize(doc.lower())
-        tokens = [word.translate(str.maketrans('', '', string.punctuation)) for word in tokens]
-        tokens = [word for word in tokens if word.isalpha() and word not in stop_words]
-        processed_docs.append(tokens)
+        new_tokens = []
+        for word in tokens:
+            word = word.translate(str.maketrans('', '', string.punctuation))
+            if word == "references":
+                break
+            if word not in stop_words and word.isalpha():
+                new_tokens.append(word)
+        # tokens = [word.translate(str.maketrans('', '', string.punctuation)) for word in tokens]
+        # tokens = [word for word in tokens if word.isalpha() and word not in stop_words]
+        processed_docs.append(new_tokens)
     return processed_docs
 
 

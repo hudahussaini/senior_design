@@ -12,7 +12,8 @@ from data_pipline.webscraper import get_all_pdfs_from_experts_for_one_author
 get_all_pdfs_from_experts_for_one_author("Birhanu Eshete")
 
 nltk.download('stopwords')
-stop_words = stopwords.words('english')
+stop_words = stopwords.words('english') + ['et', 'al', 'ie', 'page', 'eg']
+
 
 
 def create_docs(pdf_files):

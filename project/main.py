@@ -7,9 +7,9 @@ import pyLDAvis
 import pyLDAvis.gensim
 import string
 
-#from data_pipline.webscraper import get_all_pdfs_from_experts_for_one_author
+from data_pipline.webscraper import get_all_pdfs_from_experts_for_one_author
 
-#get_all_pdfs_from_experts_for_one_author("Birhanu Eshete")
+get_all_pdfs_from_experts_for_one_author("Birhanu Eshete")
 
 nltk.download('stopwords')
 stop_words = stopwords.words('english')

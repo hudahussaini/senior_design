@@ -8,12 +8,17 @@ import json
 import csvreader as cs
 
 
-
+'''
+Gathers author ID
+'''
 def URLParse(url):
     parsed_url = urlparse(url)
     id = parsed_url.path.split("/")[-1]
     return id
 
+'''
+Gathers author institution
+'''
 def get_institution(institution):
     if institution:
         current = institution[0].get('display_name', 'n/a')
@@ -21,9 +26,13 @@ def get_institution(institution):
     else:
         return 'n/a'
 
+'''
+Gathers all oa (open access) publications for given author, if any are present.
+'''
 def get_works(name, id):    
     page = 1
     publications = []
+    titles = []
     while True:
         url = "https://api.openalex.org/works"
 
@@ -33,20 +42,19 @@ def get_works(name, id):
         "per-page": 100
         }
 
-
-      # Loop to handle pagination
         response = requests.get(url, params=params)
 
         if response.status_code == 200:
             # Parse the JSON response
             data = response.json()
 
-            print(f'Open Access publications for {name} (Page {params["page"]}):\n')
             if 'results' in data and data['results']:
+                print(f'Open Access publications for {name} (Page {params["page"]}):')
                 for work in data['results']:
                     link = work['id']
                     title = work['title']
                     publications.append(link)
+                    titles.append(title)
             else:
                 print(f"{name} doesn't have open access publications")
 
@@ -59,16 +67,23 @@ def get_works(name, id):
             print(f'Failed to retrieve data. HTTP status code: {response.status_code}')
             break  # Break the loop on failure
 
-    return publications
+    return publications, titles
 
-def download_pdfs(name, url, title):    
-    file_path = f'{name}'
-    special_chars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|', '#', '&', '=']
+def title_cleaner(title):
     safe_title = title
-
+    special_chars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|', '#', '&', '=']
     for i in special_chars:
         if i in safe_title:
             safe_title = safe_title.replace(i, '-')
+    return safe_title
+
+
+'''
+Filters title names and downloads to respective folder
+'''
+def download_pdfs(name, url, title):    
+    file_path = f'{name}'
+    safe_title = title_cleaner(title)
     
     safe_title = f'{safe_title}.pdf'
     full_file_path = os.path.join(file_path, safe_title)
@@ -76,20 +91,18 @@ def download_pdfs(name, url, title):
     try:
         if not os.path.exists(file_path):
             os.makedirs(file_path)
-            # Download the PDF and save it to the specified path
         if os.path.exists(full_file_path):
             print(f'{safe_title} already downloaded')
-        #alternative = wget.download(url, out = full_file_path)
         urllib.request.urlretrieve(url, full_file_path)
-        #print(f"PDF downloaded and saved as {full_file_path}\n")
 
     except Exception as e:
-        #alternative = wget.download(url, out = full_file_path)
-        print(f"{e}\n")
+        print(f'{e}')
+        alternative = wget.download(url, out = full_file_path)
+        
     return f'Downloaded {title}\n'
 
 '''
-This is a wAAAAAAY faster option to gather publication hrefs
+accesses api to download publications found from get_works
 '''
 def api_works(name, url):
     # Loop to handle pagination
@@ -115,7 +128,12 @@ def api_works(name, url):
         print(f'error occured with {url}: {e}')
     
     return 'Next publication\n'
-    
+
+'''
+GatherAuthors is meant to gather all author ID's and institution for verification.
+All researchers that aren't under UofM Ann Arbor are put in unverified JSON dump file
+All ann arbor researchers are put in verified JSON dump file.
+'''
 def GatherAuthors(authors):
     #setting API author endpoint
     url = "https://api.openalex.org/authors"
@@ -142,7 +160,10 @@ def GatherAuthors(authors):
                     author_name = author['display_name']                
                     id = URLParse(author['id'])
                     institution = get_institution(author.get('last_known_institutions', []))
-                    works_count = author['works_count']
+                    
+                    '''Could help with debugging of pagination'''
+                    #works_count = author['works_count']
+
                     if 'University of Michigan–Ann Arbor' in institution:
                         verified[author_name] = {
                             'id': id,
@@ -157,20 +178,24 @@ def GatherAuthors(authors):
                 continue
         else:
             print(f"Failed to retrieve data. HTTP Status code: {response.status_code}") 
+
+    #creating verified dump file 
     with open('verified', 'w') as file:
         json.dump(verified, file)
     
+    #creating unverified dump file
     with open('unverified', 'w') as unfile:
         json.dump(unverified, unfile)
 
     return f'Gathered Authors' 
 
 if __name__ == '__main__':
-    authors = get_authors()['NameFull']
     '''
-    Uncomment when running the first time.
-    Comment after running
+    For below two lines:
+        Uncomment when running the first time.
+        Comment after running
     '''
+    #authors = get_authors()['NameFull']
     #GatherAuthors(authors)
 
     with open('verified', 'r') as verified:
@@ -180,8 +205,8 @@ if __name__ == '__main__':
         works = {}
         i=0
         for names, values in verified.items():
-            result = get_works(names, values['id'])                       
-            works[names] = result
+            links, titles = get_works(names, values['id'])                       
+            works[names] = links
             break
 
         #Collecting the works per author
@@ -190,18 +215,26 @@ if __name__ == '__main__':
                 id = URLParse(i)
                 api_works(name, f'https://api.openalex.org/works/{id}')
         
-    '''isr_titles = []
+    
+
+    '''
+    The below code is for the unverified authors. 
+    If the title matches what's in the csv given, assume it's the correct person and download.
+    '''   
+    isr_titles = []
     for i in cs.data['Title']:
         isr_titles.append(i)
 
+
     with open('unverified', 'r') as unverified:
         unverified = json.load(unverified)
-
         works = {}
-        for names, values in unverified.items():            
-            result = get_works(names, values['id'])                       
-            for i in result:
-                id = URLParse(i)
-                titles = api_works(names, f'https://api.openalex.org/works/{id}')
-                if titles in isr_titles:
-                    print(names, titles)'''
+        for name, values in unverified.items():  
+            links, titles = get_works(name, values['id'])
+            for values in zip(links, titles):
+                #print(values[1])
+                title = values[1]
+                link = values[0]
+                work_id = URLParse(link)
+                if title in isr_titles:
+                    api_works(name, f'https://api.openalex.org/works/{work_id}')

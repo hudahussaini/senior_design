@@ -71,7 +71,7 @@ def get_works(name, id):
 
 def title_cleaner(title):
     safe_title = title
-    special_chars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|', '#', '&', '=']
+    special_chars = ['\n', '\\', '/', ':', '*', '?', '"', '<', '>', '|', '#', '&', '=']
     for i in special_chars:
         if i in safe_title:
             safe_title = safe_title.replace(i, '-')
@@ -88,7 +88,7 @@ def download_pdfs(name, url, title):
     safe_title = f'{safe_title}.pdf'
     full_file_path = os.path.join(file_path, safe_title)
 
-    try:
+    '''try:
         if not os.path.exists(file_path):
             os.makedirs(file_path)
         if os.path.exists(full_file_path):
@@ -97,7 +97,7 @@ def download_pdfs(name, url, title):
 
     except Exception as e:
         print(f'{e}')
-        alternative = wget.download(url, out = full_file_path)
+        alternative = wget.download(url, out = full_file_path)'''
         
     return f'Downloaded {title}\n'
 
@@ -115,6 +115,10 @@ def api_works(name, url):
             title = data.get('title')
             
             for results in location:
+                doi = results['landing_page_url']
+                if 'doi' in doi:                    
+                    if doi not in doi_dict:
+                        doi_dict[title] = [doi]
                 if results['is_oa'] == True:                    
                     if results['pdf_url']: 
                         download_pdfs(name, results['pdf_url'], title)
@@ -198,6 +202,8 @@ if __name__ == '__main__':
     #authors = get_authors()['NameFull']
     #GatherAuthors(authors)
 
+    doi_dict = {}
+
     with open('verified', 'r') as verified:
         #Getting ID's to use for next loop
         verified = json.load(verified)
@@ -214,14 +220,16 @@ if __name__ == '__main__':
             for i in links:
                 id = URLParse(i)
                 api_works(name, f'https://api.openalex.org/works/{id}')
-        
+            break
+            
+    print(doi_dict)
     
 
     '''
     The below code is for the unverified authors. 
     If the title matches what's in the csv given, assume it's the correct person and download.
     '''   
-    isr_titles = []
+    '''isr_titles = []
     for i in cs.data['Title']:
         isr_titles.append(i)
 
@@ -237,4 +245,4 @@ if __name__ == '__main__':
                 link = values[0]
                 work_id = URLParse(link)
                 if title in isr_titles:
-                    api_works(name, f'https://api.openalex.org/works/{work_id}')
+                    api_works(name, f'https://api.openalex.org/works/{work_id}')'''

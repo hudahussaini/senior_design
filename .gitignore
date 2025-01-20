@@ -1,0 +1,14 @@
+*.json
+*.pyc
+# Ignore personal configuration files
+*.sublime-project
+*.sublime-workspace
+.vscode/
+.idea/
+*.iml
+senior/
+data/
+
+# Ignore Python compiled files
+__pycache__/
+*.py[cod]

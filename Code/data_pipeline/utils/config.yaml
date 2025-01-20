@@ -1,0 +1,7 @@
+email: hudah@umich.edu
+database_path: '/nfs/turbo/si-acastel/expert_field_project/data_pipeline/database/experts.db'
+all_pdf_folder_path: '/nfs/turbo/si-acastel/expert_field_project/full_pdfs_by_author/'
+#currently supported, BERT, HDP, FASTopic, LDA, Zeroshot, guidedLDA
+model: lda
+# CHATBOT
+author: Amanda Kowalski

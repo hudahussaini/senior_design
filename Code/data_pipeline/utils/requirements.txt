@@ -1,0 +1,12 @@
+gensim
+nltk
+pandas
+PyMuPDF
+pathlib
+transformers
+torch
+langchain
+langchain-nomic
+pip install "nomic[local]"
+tiktoken
+

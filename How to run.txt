@@ -1,0 +1,4 @@
+How to run the demo:
+First locate the requirements.txt file to see which modules/libraries you will need to install.
+Next, find the config.yaml file within the utils folder and specify which model you wish to run.
+After a model has been selected, locate the check_for_new_publciations.ipynb file in the data_pipeline folder.
